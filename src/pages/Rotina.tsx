@@ -7,24 +7,62 @@ import { aproveitamentoMes, DIAS, descreverDias, sequencia, tocaNoDia, useHabito
 import { salvarSessao, useEstudos } from '../lib/estudos'
 import Cronometro from '../components/Cronometro'
 import HabitosHoje from '../components/HabitosHoje'
+import Agenda from '../components/Agenda'
+import { useSearchParams } from 'react-router-dom'
 
 const CORES = ['#7c9cff', '#4ade80', '#f472b6', '#fb923c', '#facc15', '#a78bfa', '#38bdf8']
 
+type Aba = 'agenda' | 'estudos' | 'habitos'
+const ABAS: [Aba, string][] = [['agenda', 'Agenda'], ['estudos', 'Estudos'], ['habitos', 'Hábitos']]
+
+function lerAba(): Aba {
+  try {
+    const a = localStorage.getItem('aba-rotina')
+    return a === 'estudos' || a === 'habitos' ? a : 'agenda'
+  } catch { return 'agenda' }
+}
+
 export default function Rotina() {
-  const hab = useHabitos()
+  const [params, setParams] = useSearchParams()
+  const pedida = params.get('aba') as Aba | null
+  const [aba, setAbaBruta] = useState<Aba>(pedida && ABAS.some(([a]) => a === pedida) ? pedida : lerAba)
+  // ?semana=proxima abre a agenda já na semana que vem (link da revisão de domingo)
+  const semanaInicial = params.get('semana') === 'proxima' ? somarDias(inicioSemana(hojeISO()), 7) : undefined
+
+  function setAba(a: Aba) {
+    setAbaBruta(a)
+    try { localStorage.setItem('aba-rotina', a) } catch { /* ignora */ }
+    if (params.size) setParams({}, { replace: true })
+  }
+
   return (
     <>
       <h1>Rotina</h1>
-      <p className="sub">Estudos e hábitos. A agenda com blocos da semana chega na Fase 3.</p>
-      {hab.erro && <p className="aviso erro">{hab.erro}</p>}
-      <div className="grade">
-        <Estudos />
-        <section className="bloco largo">
-          <h2>Hábitos de hoje</h2>
-          {!hab.carregando && <HabitosHoje habitos={hab.habitos} feitas={hab.feitas} alternar={hab.alternar} />}
-        </section>
-        <Habitos {...hab} />
+      <p className="sub">Agenda da semana, estudos e hábitos.</p>
+      <div className="alternar largo abas" role="tablist" aria-label="Seções da rotina">
+        {ABAS.map(([a, nome]) => (
+          <button key={a} role="tab" aria-selected={aba === a} aria-pressed={aba === a} onClick={() => setAba(a)}>{nome}</button>
+        ))}
       </div>
+      <div className="grade" role="tabpanel">
+        {aba === 'agenda' && <Agenda semanaInicial={semanaInicial} />}
+        {aba === 'estudos' && <Estudos />}
+        {aba === 'habitos' && <AbaHabitos />}
+      </div>
+    </>
+  )
+}
+
+function AbaHabitos() {
+  const hab = useHabitos()
+  return (
+    <>
+      {hab.erro && <p className="aviso erro bloco largo">{hab.erro}</p>}
+      <section className="bloco largo">
+        <h2>Hábitos de hoje</h2>
+        {!hab.carregando && <HabitosHoje habitos={hab.habitos} feitas={hab.feitas} alternar={hab.alternar} />}
+      </section>
+      <Habitos {...hab} />
     </>
   )
 }

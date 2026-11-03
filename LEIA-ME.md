@@ -120,7 +120,25 @@ Não precisa rodar SQL nesta fase: as tabelas já existiam desde a Fase 0. Só s
 - **Meta semanal de horas**, barra de progresso, barras de segunda a domingo com a linha do ritmo da meta
   e a lista de sessões da semana. As setas mostram semanas anteriores.
 
+## Fase 3 — Rotina e agenda (entregue)
+
+Não precisa rodar SQL nesta fase. Só subir o código.
+
+- **A aba Rotina agora tem três partes:** Agenda, Estudos e Hábitos. Ela lembra a última que você abriu.
+- **Blocos na agenda**, de quatro tipos: Trabalho, Estudo, Pessoal e **Protegido** (tempo só seu, sem trabalho).
+  - "Toda semana" repete nos dias escolhidos; "Só uma vez" vale para uma data (ex.: dentista).
+  - Se um bloco bater no horário de outro, o app avisa, mas deixa salvar.
+  - Blocos que passam da meia-noite: divida em dois (ex.: 23h–0h e 0h–1h).
+  - Toque num bloco para editar ou remover.
+- **Visão Dia e Semana**, com setas para navegar. Na semana, o **+** de cada dia adiciona um bloco nele.
+- **Horas planejadas na semana:** quanto vai para trabalho, estudo e para você, e o estudo planejado
+  comparado com o que você realmente estudou no cronômetro.
+- **Tarefas** com data (hoje, amanhã, outro dia) ou sem data. As atrasadas aparecem em vermelho.
+- **No Hoje:** o que está acontecendo agora, o próximo bloco, a linha do dia e as tarefas de hoje.
+- **Revisão de domingo:** no fim de semana, o Hoje mostra o botão "Planejar a semana que vem",
+  que abre a agenda já na semana seguinte.
+
 ## Próxima fase
 
-**Fase 3 — Rotina e agenda:** blocos de estudo e blocos protegidos na semana, visão de dia e semana,
-tarefas pessoais com data.
+**Fase 4 — Pilares da vida:** nota semanal de 1 a 10 por pilar na revisão de domingo, gráfico de teia
+comparando com a semana anterior, histórico e aviso de pilar esquecido.

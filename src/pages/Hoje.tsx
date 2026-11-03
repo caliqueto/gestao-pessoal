@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useConta } from '../lib/conta'
 import { IconeAjustes } from '../components/Icones'
@@ -11,6 +11,57 @@ import { useEstudos } from '../lib/estudos'
 import HabitosHoje from '../components/HabitosHoje'
 import Cronometro from '../components/Cronometro'
 import { duracao } from '../lib/datas'
+import { agoraMin, blocosDoDia, fmtHora, minutosDe, TIPOS, useAgenda } from '../lib/agenda'
+import Tarefas from '../components/Tarefas'
+
+function AgendaDeHoje() {
+  const { blocos, carregando } = useAgenda()
+  const [agora, setAgora] = useState(agoraMin())
+  useEffect(() => {
+    const t = window.setInterval(() => setAgora(agoraMin()), 60000)
+    return () => window.clearInterval(t)
+  }, [])
+  const lista = blocosDoDia(blocos, hojeISO())
+  const atual = lista.find((b) => minutosDe(b.inicio) <= agora && agora < minutosDe(b.fim))
+  const proximo = lista.find((b) => minutosDe(b.inicio) > agora)
+
+  return (
+    <section className="bloco largo agenda-hoje">
+      <div className="duas-colunas">
+        <div>
+          <h2>Agenda de hoje</h2>
+          {!carregando && lista.length === 0 && (
+            <p className="vazio">Nada marcado para hoje. <Link to="/rotina?aba=agenda">Montar a rotina</Link></p>
+          )}
+          {atual && (
+            <div className="agora-box" style={{ ['--cor' as string]: TIPOS[atual.tipo].cor }}>
+              <span className="selo-agora">Agora</span>
+              <strong>{atual.titulo}</strong>
+              <span className="miudo" style={{ margin: 0 }}>até {fmtHora(atual.fim)}</span>
+            </div>
+          )}
+          {!atual && proximo && (
+            <p className="proximo">Próximo: <strong>{proximo.titulo}</strong> às {fmtHora(proximo.inicio)}</p>
+          )}
+          {lista.length > 0 && (
+            <ul className="linha-tempo">
+              {lista.map((b) => (
+                <li key={b.id} className={minutosDe(b.fim) <= agora ? 'passou' : b === atual ? 'agora' : ''} style={{ ['--cor' as string]: TIPOS[b.tipo].cor }}>
+                  <span className="num">{fmtHora(b.inicio)}</span>
+                  <span className="t">{b.titulo}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+        <div>
+          <h2>Tarefas de hoje</h2>
+          <Tarefas compacto />
+        </div>
+      </div>
+    </section>
+  )
+}
 
 function HabitosDoDia() {
   const { habitos, feitas, alternar, carregando } = useHabitos()
@@ -111,13 +162,14 @@ export default function Hoje() {
 
       <div className="grade">
         <DinheiroDoMes />
+        <AgendaDeHoje />
         <HabitosDoDia />
         <EstudoDaSemana />
         {ehRevisao && (
           <section className="bloco largo">
             <h2>Revisão do fim de semana</h2>
-            <p className="vazio">Notas dos pilares, check-in e planejamento dos estudos da semana que vem.</p>
-            <span className="fase">Fases 4 e 5</span>
+            <p className="vazio">Planeje os blocos de estudo e o tempo protegido da semana que vem. Notas dos pilares e check-in chegam nas Fases 4 e 5.</p>
+            <Link to="/rotina?aba=agenda&semana=proxima" className="botao" style={{ marginTop: 12, textDecoration: 'none' }}>Planejar a semana que vem</Link>
           </section>
         )}
       </div>
