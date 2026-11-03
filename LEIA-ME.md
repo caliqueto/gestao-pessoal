@@ -138,7 +138,29 @@ Não precisa rodar SQL nesta fase. Só subir o código.
 - **Revisão de domingo:** no fim de semana, o Hoje mostra o botão "Planejar a semana que vem",
   que abre a agenda já na semana seguinte.
 
+## Fases 4 e 5 — Pilares, metas, check-in e diário (entregues)
+
+Não precisa rodar SQL. Só subir o código.
+
+**Pilares**
+- Nota de 1 a 10 por pilar, uma vez por semana, e uma meta pequena opcional para cada um.
+- Gráfico de teia: esta semana (linha cheia) comparada com a anterior (tracejada), com a média.
+- Mapa das últimas 8 semanas: verde de 7 a 10, amarelo 5 e 6, vermelho abaixo de 5.
+- Aviso quando um pilar fica abaixo de 5 por três semanas seguidas.
+- "Editar pilares": renomear, mudar a ordem, desligar (guarda o histórico) e criar novos.
+
+**Metas**
+- Metas com pilar, prazo e passos. A barra mostra os passos feitos; o cartão mostra o próximo passo.
+- Concluir, pausar, reabrir ou apagar uma meta.
+- **Check-in da semana** com três perguntas. Mostra o que você quis mudar na semana anterior.
+- **Diário:** "Como foi o dia" (salva ao sair do campo) e uma lista de gratidão por dia.
+
+**Hoje**
+- **Intenção do dia** embaixo da saudação. Toque para escrever ou mudar.
+- No fim de semana, o cartão **Revisão da semana** aparece no topo com os três passos:
+  notas dos pilares, check-in e planejar a semana que vem. Cada um leva para a tela certa.
+
 ## Próxima fase
 
-**Fase 4 — Pilares da vida:** nota semanal de 1 a 10 por pilar na revisão de domingo, gráfico de teia
-comparando com a semana anterior, histórico e aviso de pilar esquecido.
+**Fase 6 — Acabamentos** (depois de uma ou duas semanas de uso): cartão de crédito e fatura,
+notificações, exportar em planilha, backup e os ajustes que o uso mostrar.

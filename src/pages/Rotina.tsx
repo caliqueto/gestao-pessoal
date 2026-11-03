@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import { supabase } from '../lib/supabase'
 import { useConta } from '../lib/conta'
 import { useAviso } from '../components/Aviso'
@@ -28,6 +28,10 @@ export default function Rotina() {
   const [aba, setAbaBruta] = useState<Aba>(pedida && ABAS.some(([a]) => a === pedida) ? pedida : lerAba)
   // ?semana=proxima abre a agenda já na semana que vem (link da revisão de domingo)
   const semanaInicial = params.get('semana') === 'proxima' ? somarDias(inicioSemana(hojeISO()), 7) : undefined
+  useEffect(() => {
+    // marca o passo "planejar a semana" da revisão como feito
+    if (semanaInicial) try { localStorage.setItem(`planejou-${semanaInicial}`, '1') } catch { /* ignora */ }
+  }, [semanaInicial])
 
   function setAba(a: Aba) {
     setAbaBruta(a)

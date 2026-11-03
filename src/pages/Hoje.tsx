@@ -13,6 +13,67 @@ import Cronometro from '../components/Cronometro'
 import { duracao } from '../lib/datas'
 import { agoraMin, blocosDoDia, fmtHora, minutosDe, TIPOS, useAgenda } from '../lib/agenda'
 import Tarefas from '../components/Tarefas'
+import { usePilares, notaDe } from '../lib/pilares'
+import { checkinFeito, useCheckins, useDiario } from '../lib/metas'
+import { inicioSemana, somarDias } from '../lib/datas'
+import { blocosDoDia as blocosDia } from '../lib/agenda'
+
+function Intencao() {
+  const { entradas, carregando, salvar } = useDiario(0)
+  const hoje = hojeISO()
+  const salva = entradas.find((e) => e.data === hoje && e.tipo === 'intencao')?.texto ?? ''
+  const [editando, setEditando] = useState(false)
+  const [texto, setTexto] = useState('')
+  const avisar = useAviso()
+  if (carregando) return null
+
+  async function gravar() {
+    setEditando(false)
+    if (texto.trim() === salva) return
+    if (!(await salvar(hoje, 'intencao', texto))) avisar('Não salvou a intenção.')
+  }
+  if (salva && !editando) {
+    return <button className="intencao feita" onClick={() => { setTexto(salva); setEditando(true) }} aria-label="Editar intenção do dia">{salva}</button>
+  }
+  return (
+    <input className="intencao" value={texto} placeholder="Qual a sua intenção para hoje?" aria-label="Intenção do dia"
+      autoFocus={editando} onFocus={() => { if (!editando) { setTexto(salva); setEditando(true) } }}
+      onChange={(e) => setTexto(e.target.value)} onBlur={gravar} onKeyDown={(e) => e.key === 'Enter' && (e.target as HTMLInputElement).blur()} />
+  )
+}
+
+function RevisaoDomingo() {
+  const semana = inicioSemana(hojeISO())
+  const { ativos, notas } = usePilares()
+  const { doDia } = useCheckins()
+  const { blocos } = useAgenda()
+  const avaliados = ativos.filter((p) => notaDe(notas, p.id, semana)).length
+  const checkin = checkinFeito(doDia(semana))
+  const proxima = somarDias(semana, 7)
+  const blocosProx = Array.from({ length: 7 }, (_, i) => blocosDia(blocos, somarDias(proxima, i))).flat().filter((b) => b.tipo === 'estudo' || b.tipo === 'protegido').length
+  let planejou = false
+  try { planejou = localStorage.getItem(`planejou-${proxima}`) === '1' } catch { /* ignora */ }
+  const passos = [
+    { feito: ativos.length > 0 && avaliados === ativos.length, nome: 'Dar nota aos pilares', det: `${avaliados} de ${ativos.length}`, para: '/pilares' },
+    { feito: checkin, nome: 'Fazer o check-in', det: checkin ? 'feito' : '3 perguntas', para: '/metas' },
+    { feito: planejou, nome: 'Planejar a semana que vem', det: blocosProx ? `${blocosProx} blocos de estudo e protegidos marcados` : 'nenhum bloco de estudo ou protegido ainda', para: '/rotina?aba=agenda&semana=proxima' },
+  ]
+  return (
+    <section className="bloco largo revisao">
+      <h2>Revisão da semana</h2>
+      <ol className="passos-revisao">
+        {passos.map((p) => (
+          <li key={p.nome} className={p.feito ? 'feito' : ''}>
+            <Link to={p.para}>
+              <span className="check" aria-hidden="true">{p.feito ? '✓' : ''}</span>
+              <span className="desc">{p.nome}<small>{p.det}</small></span>
+            </Link>
+          </li>
+        ))}
+      </ol>
+    </section>
+  )
+}
 
 function AgendaDeHoje() {
   const { blocos, carregando } = useAgenda()
@@ -158,20 +219,15 @@ export default function Hoje() {
         <div className="semana">{diaSemana}</div>
         <div className="data">{data}</div>
         <p className="ola">{saudacao}{nome ? `, ${nome}` : ''}.</p>
+        <Intencao />
       </header>
 
       <div className="grade">
+        {ehRevisao && <RevisaoDomingo />}
         <DinheiroDoMes />
         <AgendaDeHoje />
         <HabitosDoDia />
         <EstudoDaSemana />
-        {ehRevisao && (
-          <section className="bloco largo">
-            <h2>Revisão do fim de semana</h2>
-            <p className="vazio">Planeje os blocos de estudo e o tempo protegido da semana que vem. Notas dos pilares e check-in chegam nas Fases 4 e 5.</p>
-            <Link to="/rotina?aba=agenda&semana=proxima" className="botao" style={{ marginTop: 12, textDecoration: 'none' }}>Planejar a semana que vem</Link>
-          </section>
-        )}
       </div>
     </>
   )
