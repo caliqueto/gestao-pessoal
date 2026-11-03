@@ -1,7 +1,9 @@
 import { useMemo, useState, type FormEvent } from 'react'
 import { supabase } from '../lib/supabase'
 import { mesAtual, nomeDia, nomeMes, reais, lerValor, somarMeses } from '../lib/datas'
-import { calcularMes, compararMeses, textoCor, useFinancas, type Categoria, type Tipo } from '../lib/financas'
+import { calcularMes, compararMeses, textoCor, useFinancas, type Categoria, type Lancamento, type Tipo } from '../lib/financas'
+import { useCartoes, type Cartao } from '../lib/cartoes'
+import PainelCartoes from '../components/Cartoes'
 import Lancar from '../components/Lancar'
 import Rosca from '../components/Rosca'
 import { useAviso } from '../components/Aviso'
@@ -16,10 +18,16 @@ export default function Financas() {
   const meses = useMemo(() => compararMeses(mes, lancamentos), [mes, lancamentos])
   const doMes = lancamentos.filter((l) => l.data.startsWith(mes))
   const cat = (id: string | null) => categorias.find((c) => c.id === id)
+  const cartoes = useCartoes()
+  const nomeCartao = (id?: string | null) => (id ? cartoes.cartoes.find((c) => c.id === id)?.nome ?? 'Cartão' : '')
 
-  async function apagar(id: string, texto: string) {
-    if (!confirm(`Apagar o lançamento "${texto}"?`)) return
-    const { error } = await supabase.from('lancamentos').delete().eq('id', id)
+  async function apagar(l: Lancamento, texto: string) {
+    const parcelado = l.compra_id && (l.parcelas ?? 1) > 1
+    if (!confirm(parcelado ? `Apagar a compra "${texto}" e todas as ${l.parcelas} parcelas?` : `Apagar o lançamento "${texto}"?`)) return
+    const { error } = parcelado
+      ? await supabase.from('lancamentos').delete().eq('compra_id', l.compra_id!)
+      : await supabase.from('lancamentos').delete().eq('id', l.id)
+    cartoes.recarregar()
     if (error) avisar('Não foi possível apagar. Tente de novo.')
     else { avisar('Lançamento apagado.'); recarregar() }
   }
@@ -75,6 +83,12 @@ export default function Financas() {
             )}
           </section>
 
+          {cartoes.disponivel ? (
+            <PainelCartoes {...cartoes} avisar={avisar} />
+          ) : (
+            <p className="aviso bloco largo">Para acompanhar os cartões de crédito, rode o arquivo <strong>supabase/cartoes.sql</strong> no Supabase (veja o LEIA-ME).</p>
+          )}
+
           {/* ---------- Limites ---------- */}
           <section className="bloco">
             <h2>Limites por categoria</h2>
@@ -122,10 +136,12 @@ export default function Financas() {
                         <span className="desc">
                           {texto}
                           {l.descricao && c && <small>{c.nome}</small>}
-                          {l.recorrente_id && <small>Fixo</small>}
+                          {(l.recorrente_id || l.cartao_id) && (
+                            <small>{[l.recorrente_id && 'Fixo', nomeCartao(l.cartao_id), l.parcelas && `${l.parcela}/${l.parcelas}`].filter(Boolean).join(', ')}</small>
+                          )}
                         </span>
                         <span className={`num ${l.tipo === 'entrada' ? 'bom' : ''}`}>{l.tipo === 'entrada' ? '+' : '−'} {reais(l.valor)}</span>
-                        <button className="apagar" aria-label={`Apagar ${texto}`} onClick={() => apagar(l.id, texto)}>×</button>
+                        <button className="apagar" aria-label={`Apagar ${texto}`} onClick={() => apagar(l, texto)}>×</button>
                       </li>
                     )
                   })}
@@ -174,14 +190,14 @@ export default function Financas() {
             </div>
           </section>
 
-          <Fixos categorias={categorias} recorrentes={recorrentes} mudou={recarregar} avisar={avisar} />
+          <Fixos categorias={categorias} recorrentes={recorrentes} cartoes={cartoes.ativos} mudou={recarregar} avisar={avisar} />
           <Metas metas={metas} mudou={recarregar} avisar={avisar} />
           <Categorias categorias={categorias} mudou={recarregar} avisar={avisar} />
         </div>
       )}
 
       <button className="fab" aria-label="Lançar gasto ou entrada" onClick={() => setLancando(true)}>+</button>
-      {lancando && <Lancar categorias={categorias} fechar={() => setLancando(false)} salvo={(m) => { avisar(m); recarregar() }} />}
+      {lancando && <Lancar categorias={categorias} fechar={() => setLancando(false)} salvo={(m) => { avisar(m); recarregar(); cartoes.recarregar() }} />}
     </>
   )
 }
@@ -189,17 +205,17 @@ export default function Financas() {
 type Base = { mudou: () => void; avisar: (m: string) => void }
 
 /* ---------- Gastos fixos ---------- */
-function Fixos({ categorias, recorrentes, mudou, avisar }: Base & { categorias: Categoria[]; recorrentes: import('../lib/financas').Recorrente[] }) {
+function Fixos({ categorias, recorrentes, cartoes, mudou, avisar }: Base & { categorias: Categoria[]; recorrentes: import('../lib/financas').Recorrente[]; cartoes: Cartao[] }) {
   const [abrir, setAbrir] = useState(false)
-  const [f, setF] = useState({ descricao: '', valor: '', dia: '5', tipo: 'saida' as Tipo, categoria: '' })
+  const [f, setF] = useState({ descricao: '', valor: '', dia: '5', tipo: 'saida' as Tipo, categoria: '', cartao: '' })
 
   async function criar(e: FormEvent) {
     e.preventDefault()
     const v = lerValor(f.valor)
     if (!(v > 0)) return avisar('Digite um valor válido.')
-    const { error } = await supabase.from('recorrentes').insert({
-      descricao: f.descricao.trim(), valor: v, dia_mes: Number(f.dia), tipo: f.tipo, categoria_id: f.categoria || null,
-    })
+    const dados: Record<string, unknown> = { descricao: f.descricao.trim(), valor: v, dia_mes: Number(f.dia), tipo: f.tipo, categoria_id: f.categoria || null }
+    if (f.tipo === 'saida' && f.cartao) dados.cartao_id = f.cartao
+    const { error } = await supabase.from('recorrentes').insert(dados)
     if (error) return avisar('Não foi possível salvar o fixo.')
     avisar(`${f.descricao} será lançado todo dia ${f.dia}.`)
     setF({ ...f, descricao: '', valor: '' }); setAbrir(false); mudou()
@@ -219,7 +235,7 @@ function Fixos({ categorias, recorrentes, mudou, avisar }: Base & { categorias: 
           {recorrentes.map((r) => (
             <li key={r.id}>
               <span className="dia-fixo num">dia {r.dia_mes}</span>
-              <span className="desc">{r.descricao}</span>
+              <span className="desc">{r.descricao}{r.cartao_id && <small>{cartoes.find((c) => c.id === r.cartao_id)?.nome ?? 'Cartão'}</small>}</span>
               <span className={`num ${r.tipo === 'entrada' ? 'bom' : ''}`}>{reais(r.valor)}</span>
               <button className="apagar" aria-label={`Parar ${r.descricao}`} onClick={() => parar(r.id, r.descricao)}>×</button>
             </li>
@@ -245,6 +261,13 @@ function Fixos({ categorias, recorrentes, mudou, avisar }: Base & { categorias: 
               <option value="">Sem categoria</option>
               {categorias.filter((c) => c.tipo === f.tipo && c.ativo).map((c) => <option key={c.id} value={c.id}>{c.nome}</option>)}
             </select></div>
+          {f.tipo === 'saida' && cartoes.length > 0 && (
+            <div className="campo"><label htmlFor="fx-ct">Como paga</label>
+              <select id="fx-ct" value={f.cartao} onChange={(e) => setF({ ...f, cartao: e.target.value })}>
+                <option value="">Pix, débito ou boleto</option>
+                {cartoes.map((c) => <option key={c.id} value={c.id}>Cartão {c.nome}</option>)}
+              </select></div>
+          )}
           <div className="acoes"><button className="botao">Salvar fixo</button><button type="button" className="botao sec" onClick={() => setAbrir(false)}>Cancelar</button></div>
         </form>
       ) : (
@@ -343,6 +366,7 @@ function Categorias({ categorias, mudou, avisar }: Base & { categorias: Categori
       <details>
         <summary><h2>Categorias e limites</h2></summary>
         <p className="miudo">Deixe o limite vazio para não ter limite. Categorias de autocuidado somam no total de autocuidado.</p>
+        <div className="rolar">
         <table className="tabela cats">
           <thead><tr><th>Gastos</th><th>Limite por mês</th><th>Autocuidado</th><th>Ativa</th></tr></thead>
           <tbody>
@@ -358,6 +382,7 @@ function Categorias({ categorias, mudou, avisar }: Base & { categorias: Categori
             ))}
           </tbody>
         </table>
+        </div>
         <p className="miudo">Entradas: {grupo('entrada').map((c) => c.nome).join(', ') || 'nenhuma'}</p>
         <form onSubmit={criar} className="nova-cat">
           <input required placeholder="Nova categoria" aria-label="Nome da nova categoria" value={nova.nome} onChange={(e) => setNova({ ...nova, nome: e.target.value })} />

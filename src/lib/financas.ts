@@ -4,13 +4,25 @@ import { diasNoMes, hojeISO, mesAtual, primeiroDia, somarMeses, ultimoDia } from
 
 export type Tipo = 'entrada' | 'saida'
 export type Categoria = { id: string; nome: string; tipo: Tipo; cor: string; limite_mensal: number | null; autocuidado: boolean; ativo: boolean }
-export type Lancamento = { id: string; data: string; tipo: Tipo; valor: number; categoria_id: string | null; descricao: string | null; recorrente_id: string | null }
-export type Recorrente = { id: string; descricao: string; tipo: Tipo; valor: number; categoria_id: string | null; dia_mes: number; ativo: boolean }
+export type Lancamento = {
+  id: string; data: string; tipo: Tipo; valor: number; categoria_id: string | null; descricao: string | null; recorrente_id: string | null
+  cartao_id?: string | null; parcela?: number | null; parcelas?: number | null; compra_id?: string | null
+}
+export type Recorrente = { id: string; descricao: string; tipo: Tipo; valor: number; categoria_id: string | null; dia_mes: number; ativo: boolean; cartao_id?: string | null }
 export type MetaEconomia = { id: string; nome: string; valor_alvo: number; valor_guardado: number; prazo: string | null; concluida: boolean }
 
 export type Cor = 'verde' | 'amarelo' | 'vermelho' | 'neutro'
 
 const n = (v: unknown) => Number(v) || 0
+
+const COLUNAS = 'id,data,tipo,valor,categoria_id,descricao,recorrente_id'
+/** Busca com as colunas do cartão; se o cartoes.sql ainda não foi rodado, cai para as colunas antigas. */
+async function buscarLancamentos(desde: string, ate: string) {
+  const q = (cols: string) => supabase.from('lancamentos').select(cols)
+    .gte('data', desde).lte('data', ate).order('data', { ascending: false }).order('criado_em', { ascending: false })
+  const r = await q(`${COLUNAS},cartao_id,parcela,parcelas,compra_id`)
+  return r.error ? q(COLUNAS) : r
+}
 
 /** Carrega tudo que a tela de finanças precisa para um mês (e os 5 anteriores para a comparação). */
 export function useFinancas(mes: string) {
@@ -30,15 +42,14 @@ export function useFinancas(mes: string) {
     const desde = primeiroDia(somarMeses(mes, -5))
     const [c, l, r, m] = await Promise.all([
       supabase.from('categorias').select('*').order('nome'),
-      supabase.from('lancamentos').select('id,data,tipo,valor,categoria_id,descricao,recorrente_id')
-        .gte('data', desde).lte('data', ultimoDia(mes)).order('data', { ascending: false }).order('criado_em', { ascending: false }),
+      buscarLancamentos(desde, ultimoDia(mes)),
       supabase.from('recorrentes').select('*').eq('ativo', true).order('dia_mes'),
       supabase.from('metas_economia').select('*').order('concluida').order('nome'),
     ])
     const falha = c.error || l.error || r.error || m.error
     if (falha) setErro('Não foi possível carregar os dados. Confira a internet e tente de novo.')
     setCategorias((c.data ?? []).map((x) => ({ ...x, limite_mensal: x.limite_mensal == null ? null : n(x.limite_mensal) })))
-    setLancamentos((l.data ?? []).map((x) => ({ ...x, valor: n(x.valor) })))
+    setLancamentos(((l.data ?? []) as unknown as Lancamento[]).map((x) => ({ ...x, valor: n(x.valor) })))
     setRecorrentes((r.data ?? []).map((x) => ({ ...x, valor: n(x.valor) })))
     setMetas((m.data ?? []).map((x) => ({ ...x, valor_alvo: n(x.valor_alvo), valor_guardado: n(x.valor_guardado) })))
     setCarregando(false)

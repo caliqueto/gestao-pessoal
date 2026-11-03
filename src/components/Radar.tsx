@@ -3,7 +3,7 @@ type Serie = { nome: string; valores: (number | null)[]; cor: string; tracejada?
 /** Gráfico de teia: um eixo por pilar, de 0 (centro) a 10 (borda). */
 export default function Radar({ eixos, series }: { eixos: { nome: string; cor: string }[]; series: Serie[] }) {
   const n = eixos.length
-  const L = 340, cx = L / 2, cy = L / 2, R = 108
+  const L = 340, cx = L / 2, cy = L / 2, R = 98
   const ponto = (i: number, v: number) => {
     const a = -Math.PI / 2 + (i * 2 * Math.PI) / n
     return [cx + Math.cos(a) * R * (v / 10), cy + Math.sin(a) * R * (v / 10)] as const

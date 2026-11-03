@@ -13,6 +13,7 @@ import Cronometro from '../components/Cronometro'
 import { duracao } from '../lib/datas'
 import { agoraMin, blocosDoDia, fmtHora, minutosDe, TIPOS, useAgenda } from '../lib/agenda'
 import Tarefas from '../components/Tarefas'
+import { resumoCartao, useCartoes } from '../lib/cartoes'
 import { usePilares, notaDe } from '../lib/pilares'
 import { checkinFeito, useCheckins, useDiario } from '../lib/metas'
 import { inicioSemana, somarDias } from '../lib/datas'
@@ -161,6 +162,9 @@ function DinheiroDoMes() {
   const [lancando, setLancando] = useState(false)
   const avisar = useAviso()
   const r = useMemo(() => calcularMes(mes, lancamentos, categorias, recorrentes), [mes, lancamentos, categorias, recorrentes])
+  const cart = useCartoes()
+  const faturas = cart.ativos.map((c) => ({ c, r: resumoCartao(c, cart.lancs, cart.pagas) }))
+  const totalCartoes = faturas.reduce((s, f) => s + f.r.aberta.total, 0)
   const atencao = r.porCategoria.filter((c) => c.estado === 'perto' || c.estado === 'estourou').sort((a, b) => (b.uso ?? 0) - (a.uso ?? 0)).slice(0, 3)
   const hoje = lancamentos.filter((l) => l.data === hojeISO() && l.tipo === 'saida').reduce((s, l) => s + l.valor, 0)
 
@@ -179,7 +183,20 @@ function DinheiroDoMes() {
           <dl className="numeros">
             <div><dt>{r.estimativa ? 'Previsão (estimativa)' : 'Previsão do fim do mês'}</dt><dd className="num">{reais(r.previsao)}</dd></div>
             <div><dt>Gasto hoje</dt><dd className="num">{reais(hoje)}</dd></div>
+            {faturas.length > 0 && <div><dt>Nas faturas abertas</dt><dd className="num">{reais(totalCartoes)}</dd></div>}
           </dl>
+          {faturas.some((f) => (f.r.usoMeta ?? 0) >= 0.8 || f.r.fechadaVencida) && (
+            <ul className="avisos-cartao">
+              {faturas.filter((f) => (f.r.usoMeta ?? 0) >= 0.8 || f.r.fechadaVencida).map(({ c, r: fr }) => (
+                <li key={c.id}>
+                  <span className="bolinha" style={{ background: c.cor }} />
+                  {fr.fechadaVencida
+                    ? `Fatura do ${c.nome} venceu em ${fr.fechada.vence.slice(8)}/${fr.fechada.vence.slice(5, 7)} e não está marcada como paga.`
+                    : `${c.nome}: ${reais(fr.aberta.total)}, ${Math.round((fr.usoMeta ?? 0) * 100)}% do seu teto.`}
+                </li>
+              ))}
+            </ul>
+          )}
           {atencao.length > 0 && (
             <ul className="limites compacto">
               {atencao.map((c) => (
@@ -193,7 +210,7 @@ function DinheiroDoMes() {
           <Link to="/financas" className="link" style={{ display: 'inline-block', marginTop: 12 }}>Ver finanças</Link>
         </>
       )}
-      {lancando && <Lancar categorias={categorias} fechar={() => setLancando(false)} salvo={(m) => { avisar(m); recarregar() }} />}
+      {lancando && <Lancar categorias={categorias} fechar={() => setLancando(false)} salvo={(m) => { avisar(m); recarregar(); cart.recarregar() }} />}
     </section>
   )
 }

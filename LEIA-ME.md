@@ -160,6 +160,26 @@ Não precisa rodar SQL. Só subir o código.
 - No fim de semana, o cartão **Revisão da semana** aparece no topo com os três passos:
   notas dos pilares, check-in e planejar a semana que vem. Cada um leva para a tela certa.
 
+## Cartões de crédito (entregue)
+
+**Precisa rodar SQL:** no Supabase, SQL Editor → New query → cole o conteúdo de `supabase/cartoes.sql` → Run.
+Sem isso o resto do app funciona, mas a parte de cartões mostra um aviso pedindo para rodar o arquivo.
+
+- **Cadastrar o cartão** (Finanças → Cartões de crédito): nome, dia que fecha, dia que vence, limite e um
+  teto opcional de quanto você quer gastar por fatura. Os dias aparecem no app do banco.
+- **Lançar no cartão:** no lançamento rápido, escolha "Pix ou débito" ou o cartão. No cartão dá para
+  parcelar (1x a 12x); o app mostra o valor da parcela e em qual fatura cai. Ele lembra a última forma
+  de pagamento usada naquele aparelho.
+- **Regra de fatura:** compra até a véspera do fechamento cai na fatura do mês; no dia do fechamento ou
+  depois, na do mês seguinte.
+- **Sem contar duas vezes:** a compra (ou cada parcela, no mês dela) já conta como gasto. Ao pagar a fatura,
+  **não lance o pagamento**: só toque em "Marcar como paga".
+- **Painel de cada cartão:** fatura aberta e quantos dias faltam para fechar, avanço do teto (avisa em 80%),
+  última fatura fechada com o vencimento, o que já está comprometido nas próximas 3 faturas e o limite usado.
+- **No Hoje:** quanto já está nas faturas abertas, aviso de teto passando de 80% e de fatura vencida não marcada.
+- **Fixos no cartão:** assinaturas podem ser cadastradas como fixo "no cartão" e caem na fatura certa.
+- Apagar uma compra parcelada apaga todas as parcelas dela.
+
 ## Próxima fase
 
 **Fase 6 — Acabamentos** (depois de uma ou duas semanas de uso): cartão de crédito e fatura,
