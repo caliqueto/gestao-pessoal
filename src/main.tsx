@@ -9,7 +9,8 @@ import Login from './pages/Login'
 import Hoje from './pages/Hoje'
 import Ajustes from './pages/Ajustes'
 import Financas from './pages/Financas'
-import { Metas, Pilares, Rotina } from './pages/EmBreve'
+import Rotina from './pages/Rotina'
+import { Metas, Pilares } from './pages/EmBreve'
 import { AvisoProvider } from './components/Aviso'
 
 registerSW({ immediate: true })

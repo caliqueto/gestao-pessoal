@@ -6,6 +6,42 @@ import { calcularMes, textoCor, useFinancas } from '../lib/financas'
 import { hojeISO, mesAtual, reais } from '../lib/datas'
 import Lancar from '../components/Lancar'
 import { useAviso } from '../components/Aviso'
+import { useHabitos } from '../lib/habitos'
+import { useEstudos } from '../lib/estudos'
+import HabitosHoje from '../components/HabitosHoje'
+import Cronometro from '../components/Cronometro'
+import { duracao } from '../lib/datas'
+
+function HabitosDoDia() {
+  const { habitos, feitas, alternar, carregando } = useHabitos()
+  return (
+    <section className="bloco">
+      <h2>Hábitos de hoje</h2>
+      {!carregando && <HabitosHoje habitos={habitos} feitas={feitas} alternar={alternar} />}
+    </section>
+  )
+}
+
+function EstudoDaSemana() {
+  const { totalMin, recarregar, carregando } = useEstudos()
+  const { prefs } = useConta()
+  const metaMin = (prefs.meta_horas_estudo ?? 0) * 60
+  return (
+    <section className="bloco">
+      <h2>Estudo da semana</h2>
+      <div className="meta-estudo" style={{ marginTop: 0 }}>
+        <div className="total">
+          <span className="num grande">{carregando ? '…' : duracao(totalMin)}</span>
+          {metaMin > 0 && <span className="de"> de {duracao(metaMin)}</span>}
+        </div>
+        {metaMin > 0
+          ? <div className="barra meta" style={{ marginBottom: 14 }}><div style={{ width: `${Math.min(totalMin / metaMin, 1) * 100}%` }} /></div>
+          : <p className="miudo" style={{ margin: '4px 0 14px' }}>Defina sua meta semanal na aba <Link to="/rotina">Rotina</Link>.</p>}
+      </div>
+      <Cronometro salvo={recarregar} compacto />
+    </section>
+  )
+}
 
 function DinheiroDoMes() {
   const mes = mesAtual()
@@ -75,16 +111,8 @@ export default function Hoje() {
 
       <div className="grade">
         <DinheiroDoMes />
-        <section className="bloco">
-          <h2>Hábitos de hoje</h2>
-          <p className="vazio">Estudar design e lançar os gastos do dia, marcados com um toque.</p>
-          <span className="fase">Fase 2</span>
-        </section>
-        <section className="bloco">
-          <h2>Estudo da semana</h2>
-          <p className="vazio">Horas estudadas na mentoria contra a sua meta semanal.</p>
-          <span className="fase">Fase 2</span>
-        </section>
+        <HabitosDoDia />
+        <EstudoDaSemana />
         {ehRevisao && (
           <section className="bloco largo">
             <h2>Revisão do fim de semana</h2>

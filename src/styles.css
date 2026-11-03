@@ -165,7 +165,7 @@ h2 { font-size: 17px; font-weight: 600; margin: 0 0 12px; }
 .numeros { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px 16px; margin: 16px 0 0; }
 @media (min-width: 900px) { .numeros { grid-template-columns: repeat(4, 1fr); } }
 .numeros dt { font-size: 13px; color: var(--texto-2); }
-.numeros dd { margin: 2px 0 0; font-weight: 600; font-size: 17px; }
+.numeros dd { margin: 2px 0 0; font-weight: 600; font-size: 17px; white-space: nowrap; }
 
 .limites, .metas { list-style: none; padding: 0; margin: 0; display: grid; gap: 14px; }
 .limites.compacto { margin-top: 16px; gap: 10px; }
@@ -273,5 +273,85 @@ input[type='checkbox'] { width: 20px; height: 20px; accent-color: var(--destaque
 }
 .toast[data-visivel='nao'] { opacity: 0; }
 @media (min-width: 900px) { .toast { bottom: 108px; } }
+
+/* ---------- Hábitos ---------- */
+.habitos-hoje { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
+@media (min-width: 900px) { .largo .habitos-hoje { grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); } }
+.marcar {
+  width: 100%; display: flex; align-items: center; gap: 12px; min-height: 56px; padding: 8px 12px;
+  border: 1px solid var(--linha); border-radius: 12px; background: var(--superficie-2); cursor: pointer; text-align: left;
+}
+.marcar .circulo {
+  width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--cor, var(--destaque)); flex: none;
+  display: grid; place-items: center; font-weight: 700; color: #000; font-size: 15px; transition: background 0.15s;
+}
+.marcar.feito .circulo { background: var(--cor, var(--destaque)); }
+.marcar.feito .nome { color: var(--texto-2); }
+.marcar .nome { flex: 1; display: flex; flex-direction: column; }
+.marcar small { font-size: 12px; color: var(--texto-2); }
+.seq { font-size: 13px; font-weight: 600; color: var(--cor, var(--destaque)); white-space: nowrap; }
+
+.lista-habitos { display: grid; gap: 12px; margin-top: 14px; }
+@media (min-width: 900px) { .lista-habitos { grid-template-columns: repeat(2, 1fr); } }
+.cartao-habito { border: 1px solid var(--linha); border-radius: 12px; padding: 14px; background: var(--fundo); }
+.hab-topo { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+.hab-topo h3 { margin: 0; font-size: 16px; display: flex; align-items: center; gap: 8px; }
+.hab-numeros { margin-top: 10px; }
+.hab-numeros .de { color: var(--texto-2); font-size: 13px; font-weight: 400; }
+.calendario { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-top: 12px; max-width: 300px; }
+.calendario .cab { font-size: 11px; color: var(--texto-2); text-align: center; }
+.quad {
+  aspect-ratio: 1; border: 0; border-radius: 6px; font-size: 11px; cursor: pointer; padding: 0;
+  background: var(--superficie-2); color: var(--texto-2); font-variant-numeric: tabular-nums;
+}
+.quad.feito { background: var(--cor); color: #000; font-weight: 600; }
+.quad.falhou { background: color-mix(in srgb, var(--ruim) 16%, var(--superficie-2)); }
+.quad.folga { background: none; opacity: 0.45; }
+.quad.futuro { background: none; opacity: 0.25; cursor: default; }
+.quad.eh-hoje { outline: 2px solid var(--texto); outline-offset: -2px; }
+
+.form-habito .rotulo-campo { font-size: 14px; color: var(--texto-2); }
+.dias-escolha { display: flex; gap: 6px; }
+.dias-escolha button {
+  width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--linha); background: var(--superficie-2); cursor: pointer; font-weight: 600;
+}
+.dias-escolha button[aria-pressed='true'] { background: var(--destaque); color: #000; border-color: var(--destaque); }
+.atalhos { display: flex; gap: 16px; }
+.cor.pequena { width: 34px; height: 34px; }
+.link.perigo { color: var(--ruim); }
+.seletor-mes button:disabled { opacity: 0.3; cursor: default; }
+
+/* ---------- Estudos ---------- */
+.cronometro { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 16px; }
+.cronometro .assunto {
+  flex: 1; min-width: 200px; background: var(--superficie-2); border: 1px solid var(--linha); border-radius: 10px; padding: 12px 14px; font-size: 16px;
+}
+.cronometro.compacto { margin-bottom: 0; }
+.cronometro.compacto .botao { width: 100%; }
+.cronometro.ligado {
+  justify-content: space-between; padding: 14px 16px; border-radius: 12px;
+  background: color-mix(in srgb, var(--destaque) 12%, var(--superficie-2)); border: 1px solid color-mix(in srgb, var(--destaque) 40%, transparent);
+}
+.cronometro.ligado.compacto .botao { width: auto; }
+.cronometro .tempo { font-size: 34px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.1; }
+.cronometro.parado { display: block; padding: 14px 16px; border-radius: 12px; background: var(--superficie-2); }
+.cronometro.parado .campo span { font-size: 14px; color: var(--texto-2); }
+.cronometro.parado input { background: var(--superficie); border: 1px solid var(--linha); border-radius: 10px; padding: 12px 14px; font-size: 20px; width: 140px; }
+
+.meta-estudo { margin: 4px 0 18px; }
+.meta-estudo .total { margin-bottom: 8px; }
+.meta-estudo .grande { font-size: 30px; font-weight: 700; letter-spacing: -0.02em; }
+.meta-estudo .de { color: var(--texto-2); }
+
+.barras-semana { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; height: 150px; }
+.barras-semana .coluna { display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 0; }
+.barras-semana .valor { font-size: 11px; color: var(--texto-2); height: 16px; white-space: nowrap; }
+.barras-semana .trilho { flex: 1; width: 100%; max-width: 44px; position: relative; background: var(--superficie-2); border-radius: 8px; overflow: hidden; }
+.barras-semana .enche { position: absolute; inset: auto 0 0 0; background: var(--destaque); border-radius: 8px 8px 0 0; }
+.barras-semana .linha-meta { position: absolute; left: 0; right: 0; border-top: 2px dashed var(--texto-2); opacity: 0.6; z-index: 1; }
+.barras-semana .dia { font-size: 12px; color: var(--texto-2); }
+.barras-semana .hoje .dia { color: var(--destaque); font-weight: 700; }
+.sub-h { font-size: 15px; font-weight: 600; margin: 0; }
+.linha-form .campo input { max-width: 160px; }
 
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }

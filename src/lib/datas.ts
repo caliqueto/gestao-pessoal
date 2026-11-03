@@ -48,3 +48,22 @@ export function lerValor(t: string) {
   if (s.includes(',')) s = s.replace(/\./g, '').replace(',', '.')
   return s ? Number(s) : NaN
 }
+
+export function somarDias(s: string, n: number) {
+  const d = deISO(s)
+  d.setDate(d.getDate() + n)
+  return iso(d)
+}
+/** 0 = domingo ... 6 = sábado */
+export const diaDaSemana = (s: string) => deISO(s).getDay()
+/** Segunda-feira da semana da data */
+export function inicioSemana(s: string) {
+  return somarDias(s, -((diaDaSemana(s) + 6) % 7))
+}
+/** 85 → '1h 25min', 40 → '40min', 120 → '2h' */
+export function duracao(min: number) {
+  const m = Math.round(min)
+  const h = Math.floor(m / 60), r = m % 60
+  if (!h) return `${r}min`
+  return r ? `${h}h ${r}min` : `${h}h`
+}

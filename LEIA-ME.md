@@ -103,7 +103,24 @@ Cada fase nova vem com o projeto completo e, quando precisa, um arquivo `supabas
 - **Pizza dos gastos, dia a dia (Data, Entrada, Saída, Diário, Saldo) e últimos 6 meses lado a lado.**
 - **Metas de economia** com barra de progresso, e **autocuidado**: marque quais categorias contam.
 
+## Fase 2 — Hábitos e estudos (entregue)
+
+Não precisa rodar SQL nesta fase: as tabelas já existiam desde a Fase 0. Só subir o código.
+
+- **Hábitos de hoje** (no Hoje e na Rotina): um toque marca, outro desmarca. Mostra a sequência de dias.
+  - A sequência conta só os dias escolhidos: um hábito de dias úteis não quebra no fim de semana.
+  - Hoje ainda não marcado não quebra a sequência; ela só zera se um dia previsto passar em branco.
+- **Calendário do mês** por hábito: toque num dia que passou para marcar o que esqueceu.
+  Verde/colorido = feito, avermelhado = previsto e não feito, apagado = folga.
+- **Criar, editar e arquivar hábitos**, com dias da semana e cor. Arquivar guarda o histórico.
+- **Cronômetro de estudo:** "Começar a estudar" → "Parar" → confira os minutos → "Salvar".
+  Continua contando com o app fechado, mas só no aparelho em que você começou.
+  Se esqueceu ligado, corrija os minutos antes de salvar.
+- **Registrar sem cronômetro** para estudos que você fez longe do app (escolhe o dia e os minutos).
+- **Meta semanal de horas**, barra de progresso, barras de segunda a domingo com a linha do ritmo da meta
+  e a lista de sessões da semana. As setas mostram semanas anteriores.
+
 ## Próxima fase
 
-**Fase 2 — Hábitos e estudos:** hábitos marcados com um toque e sequência de dias, cronômetro de estudo
-da mentoria e meta de horas por semana.
+**Fase 3 — Rotina e agenda:** blocos de estudo e blocos protegidos na semana, visão de dia e semana,
+tarefas pessoais com data.

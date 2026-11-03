@@ -16,11 +16,6 @@ export default function EmBreve({ titulo, resumo, fase, itens }: Props) {
   )
 }
 
-export const Rotina = () => (
-  <EmBreve titulo="Rotina" fase="Fases 2 e 3"
-    resumo="Hábitos, estudos e os blocos da semana."
-    itens={['Hábitos com sequência de dias', 'Cronômetro de estudo da mentoria', 'Meta de horas por semana', 'Blocos de estudo e blocos protegidos', 'Tarefas pessoais com data']} />
-)
 export const Pilares = () => (
   <EmBreve titulo="Pilares" fase="Fase 4"
     resumo="Como cada área da vida está, semana a semana."
