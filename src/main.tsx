@@ -8,7 +8,9 @@ import Layout from './components/Layout'
 import Login from './pages/Login'
 import Hoje from './pages/Hoje'
 import Ajustes from './pages/Ajustes'
-import { Financas, Metas, Pilares, Rotina } from './pages/EmBreve'
+import Financas from './pages/Financas'
+import { Metas, Pilares, Rotina } from './pages/EmBreve'
+import { AvisoProvider } from './components/Aviso'
 
 registerSW({ immediate: true })
 
@@ -35,7 +37,9 @@ createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <BrowserRouter>
       <ContaProvider>
-        <Rotas />
+        <AvisoProvider>
+          <Rotas />
+        </AvisoProvider>
       </ContaProvider>
     </BrowserRouter>
   </StrictMode>

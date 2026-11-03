@@ -16,11 +16,6 @@ export default function EmBreve({ titulo, resumo, fase, itens }: Props) {
   )
 }
 
-export const Financas = () => (
-  <EmBreve titulo="Finanças" fase="Fase 1"
-    resumo="Para saber para onde o dinheiro vai, sem planilha."
-    itens={['Lançar gasto ou entrada em dois toques', 'Limite por categoria, com aviso em 80%', 'Termômetro do mês com previsão', 'Pizza dos gastos por categoria', 'Gastos fixos lançados sozinhos', 'Metas de economia']} />
-)
 export const Rotina = () => (
   <EmBreve titulo="Rotina" fase="Fases 2 e 3"
     resumo="Hábitos, estudos e os blocos da semana."

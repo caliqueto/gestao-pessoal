@@ -1,6 +1,54 @@
+import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useConta } from '../lib/conta'
 import { IconeAjustes } from '../components/Icones'
+import { calcularMes, textoCor, useFinancas } from '../lib/financas'
+import { hojeISO, mesAtual, reais } from '../lib/datas'
+import Lancar from '../components/Lancar'
+import { useAviso } from '../components/Aviso'
+
+function DinheiroDoMes() {
+  const mes = mesAtual()
+  const { categorias, lancamentos, recorrentes, carregando, recarregar } = useFinancas(mes)
+  const [lancando, setLancando] = useState(false)
+  const avisar = useAviso()
+  const r = useMemo(() => calcularMes(mes, lancamentos, categorias, recorrentes), [mes, lancamentos, categorias, recorrentes])
+  const atencao = r.porCategoria.filter((c) => c.estado === 'perto' || c.estado === 'estourou').sort((a, b) => (b.uso ?? 0) - (a.uso ?? 0)).slice(0, 3)
+  const hoje = lancamentos.filter((l) => l.data === hojeISO() && l.tipo === 'saida').reduce((s, l) => s + l.valor, 0)
+
+  return (
+    <section className={`bloco largo termometro ${r.cor}`}>
+      <div className="saldo-linha">
+        <div>
+          <div className="rotulo">Saldo do mês</div>
+          <div className="saldo num">{carregando ? '…' : reais(r.saldo)}</div>
+        </div>
+        <button className="botao" onClick={() => setLancando(true)}>+ Lançar</button>
+      </div>
+      {!carregando && (
+        <>
+          <p className="frase">{textoCor[r.cor]}</p>
+          <dl className="numeros">
+            <div><dt>{r.estimativa ? 'Previsão (estimativa)' : 'Previsão do fim do mês'}</dt><dd className="num">{reais(r.previsao)}</dd></div>
+            <div><dt>Gasto hoje</dt><dd className="num">{reais(hoje)}</dd></div>
+          </dl>
+          {atencao.length > 0 && (
+            <ul className="limites compacto">
+              {atencao.map((c) => (
+                <li key={c.id} className={c.estado}>
+                  <div className="lim-topo"><span>{c.nome}</span><span className="num">{Math.round((c.uso ?? 0) * 100)}% do limite</span></div>
+                  <div className="barra"><div style={{ width: `${Math.min((c.uso ?? 0) * 100, 100)}%` }} /></div>
+                </li>
+              ))}
+            </ul>
+          )}
+          <Link to="/financas" className="link" style={{ display: 'inline-block', marginTop: 12 }}>Ver finanças</Link>
+        </>
+      )}
+      {lancando && <Lancar categorias={categorias} fechar={() => setLancando(false)} salvo={(m) => { avisar(m); recarregar() }} />}
+    </section>
+  )
+}
 
 export default function Hoje() {
   const { sessao, prefs } = useConta()
@@ -26,11 +74,7 @@ export default function Hoje() {
       </header>
 
       <div className="grade">
-        <section className="bloco largo">
-          <h2>Dinheiro do mês</h2>
-          <p className="vazio">Saldo, termômetro e quanto ainda cabe em cada categoria vão aparecer aqui.</p>
-          <span className="fase">Fase 1</span>
-        </section>
+        <DinheiroDoMes />
         <section className="bloco">
           <h2>Hábitos de hoje</h2>
           <p className="vazio">Estudar design e lançar os gastos do dia, marcados com um toque.</p>

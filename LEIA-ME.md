@@ -77,7 +77,33 @@ src/pages/               Hoje, Ajustes, Login e as abas das próximas fases
 src/styles.css           cores e tipografia (troque a cor padrão em --destaque)
 ```
 
+## Atualizar para uma fase nova
+
+Cada fase nova vem com o projeto completo e, quando precisa, um arquivo `supabase/faseN.sql`.
+
+1. **Banco:** no Supabase, abra **SQL Editor → New query**, cole o conteúdo do `faseN.sql` e clique em **Run**.
+2. **Código:** no GitHub, abra o repositório → **Add file → Upload files** → arraste de novo todo o
+   conteúdo da pasta (menos `node_modules`, `dist` e `.env`) → **Commit changes**. Arquivos com o
+   mesmo nome são substituídos.
+3. A Vercel percebe a mudança e publica sozinha em um ou dois minutos. No celular, feche e abra o app
+   (se ainda aparecer a versão antiga, abra uma vez pelo navegador).
+
+## Fase 1 — Finanças (entregue)
+
+- **Lançar em dois toques:** botão **+** → digite o valor → toque na categoria, que já salva.
+  "Adicionar descrição ou outra data" para lançar algo de outro dia.
+- **Termômetro:** saldo do mês, cor (verde, amarelo, vermelho) e previsão de como o mês fecha.
+  - Verde: deve sobrar 10% ou mais do que entrou. Amarelo: sobra menos que isso. Vermelho: falta.
+  - A previsão soma os fixos que ainda vão cair e projeta os gastos do dia a dia pelo ritmo do mês.
+    Até o dia 10, usa também o ritmo dos meses anteriores, para uma compra grande no começo não distorcer.
+- **Limites por categoria:** em "Categorias e limites", digite o limite mensal. Passou de 80%, fica amarelo
+  e avisa quanto resta; passou de 100%, fica vermelho. As mais apertadas aparecem também no Hoje.
+- **Gastos e entradas fixos:** cadastre uma vez (aluguel, internet, mentoria, salário) e eles são
+  lançados sozinhos no dia do vencimento, quando você abre o app. Dia 31 vira o último dia do mês.
+- **Pizza dos gastos, dia a dia (Data, Entrada, Saída, Diário, Saldo) e últimos 6 meses lado a lado.**
+- **Metas de economia** com barra de progresso, e **autocuidado**: marque quais categorias contam.
+
 ## Próxima fase
 
-**Fase 1 — Hoje + Finanças:** lançar gastos em dois toques, limites por categoria com aviso em 80%,
-termômetro do mês, pizza de gastos e gastos fixos automáticos. O banco já está pronto para ela.
+**Fase 2 — Hábitos e estudos:** hábitos marcados com um toque e sequência de dias, cronômetro de estudo
+da mentoria e meta de horas por semana.
